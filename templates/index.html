@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NINAI Builds — Post-Call Follow-up</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #18181f;
+      border: 1px solid #2a2a35;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    .brand {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #7c6fff;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f0f0f8;
+      margin-bottom: 32px;
+      line-height: 1.3;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #9090a8;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #0f0f13;
+      border: 1px solid #2a2a35;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: #e8e8f0;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #7c6fff;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #44445a;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .optional-tag {
+      font-size: 11px;
+      color: #44445a;
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      background: #7c6fff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+      font-family: inherit;
+    }
+
+    button[type="submit"]:hover { background: #6b5ef0; }
+    button[type="submit"]:active { transform: scale(0.99); }
+    button[type="submit"]:disabled { background: #3a3a50; color: #666; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result {
+      display: none;
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid;
+    }
+
+    .result.success {
+      background: #0d1f12;
+      border-color: #2a5c38;
+    }
+
+    .result.error {
+      background: #1f0d0d;
+      border-color: #5c2a2a;
+    }
+
+    .result-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .result.success .result-title { color: #4ade80; }
+    .result.error .result-title { color: #f87171; }
+
+    .meet-link-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0f0f13;
+      border: 1px solid #2a2a35;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .meet-link-text {
+      flex: 1;
+      font-size: 13px;
+      color: #7c6fff;
+      word-break: break-all;
+      text-decoration: none;
+    }
+
+    .meet-link-text:hover { text-decoration: underline; }
+
+    .copy-btn {
+      background: #2a2a35;
+      border: none;
+      border-radius: 6px;
+      color: #9090a8;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      transition: background 0.1s, color 0.1s;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover { background: #3a3a50; color: #e8e8f0; }
+    .copy-btn.copied { background: #2a5c38; color: #4ade80; }
+
+    .reminder-note {
+      font-size: 12px;
+      color: #6060788;
+      color: #60607a;
+    }
+
+    .error-msg {
+      font-size: 13px;
+      color: #fca5a5;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2a2a35;
+      margin: 24px 0;
+    }
+
+    .send-another {
+      display: none;
+      width: 100%;
+      background: transparent;
+      border: 1px solid #2a2a35;
+      border-radius: 10px;
+      color: #9090a8;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .send-another:hover { border-color: #7c6fff; color: #e8e8f0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">NINAI Builds</div>
+    <h1>Send post-call follow-up</h1>
+
+    <form id="form">
+      <div class="field">
+        <label for="client_name">Client first name</label>
+        <input type="text" id="client_name" name="client_name" placeholder="Sarah" required autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="client_email">Client email</label>
+        <input type="email" id="client_email" name="client_email" placeholder="sarah@company.com" required />
+      </div>
+
+      <div class="field">
+        <label for="meeting_datetime">Meeting date &amp; time</label>
+        <input type="datetime-local" id="meeting_datetime" name="meeting_datetime" required />
+      </div>
+
+      <div class="field">
+        <label for="note">
+          What did you discuss?
+          <span class="optional-tag">optional</span>
+        </label>
+        <textarea id="note" name="note" placeholder="e.g. their lead gen challenges and scaling their outbound"></textarea>
+      </div>
+
+      <button type="submit" id="submit-btn">Send follow-up email</button>
+    </form>
+
+    <div class="result success" id="result-success">
+      <div class="result-title">Email sent</div>
+      <div class="meet-link-row">
+        <a class="meet-link-text" id="meet-link-anchor" href="#" target="_blank">—</a>
+        <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+      </div>
+      <div class="reminder-note" id="reminder-note"></div>
+    </div>
+
+    <div class="result error" id="result-error">
+      <div class="result-title">Something went wrong</div>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <button class="send-another" id="send-another" type="button">Send another</button>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const submitBtn = document.getElementById('submit-btn');
+    const resultSuccess = document.getElementById('result-success');
+    const resultError = document.getElementById('result-error');
+    const meetLinkAnchor = document.getElementById('meet-link-anchor');
+    const copyBtn = document.getElementById('copy-btn');
+    const reminderNote = document.getElementById('reminder-note');
+    const errorMsg = document.getElementById('error-msg');
+    const sendAnother = document.getElementById('send-another');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultSuccess.style.display = 'none';
+      resultError.style.display = 'none';
+      sendAnother.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Sending…';
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch('/submit', { method: 'POST', body: data });
+        const json = await res.json();
+
+        if (json.success) {
+          meetLinkAnchor.href = json.meet_link;
+          meetLinkAnchor.textContent = json.meet_link;
+          reminderNote.textContent = json.reminder_scheduled_at
+            ? `Reminder scheduled for ${json.reminder_scheduled_at}`
+            : 'No reminder scheduled (meeting is very soon).';
+          resultSuccess.style.display = 'block';
+          sendAnother.style.display = 'block';
+          form.reset();
+        } else {
+          errorMsg.textContent = json.error || 'Unknown error.';
+          resultError.style.display = 'block';
+        }
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        resultError.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send follow-up email';
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(meetLinkAnchor.href).then(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+
+    sendAnother.addEventListener('click', () => {
+      resultSuccess.style.display = 'none';
+      sendAnother.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
