@@ -1,0 +1,15 @@
+name: Ping reminders
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check reminders
+        run: |
+          curl -s --max-time 30 \
+            "https://ninai-followup.onrender.com/cron?secret=${{ secrets.CRON_SECRET }}"
