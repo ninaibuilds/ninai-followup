@@ -80,8 +80,10 @@ def submit():
         })
 
     except Exception as e:
-        logging.error('Submit failed', exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        import traceback
+        tb = traceback.format_exc()
+        logging.error('Submit failed:\n' + tb)
+        return jsonify({'success': False, 'error': str(e), 'detail': tb}), 500
 
 
 @app.route('/cron')
