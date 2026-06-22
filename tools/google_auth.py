@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 
 from google.auth.transport.requests import Request
@@ -16,35 +17,27 @@ CREDENTIALS_FILE = os.path.join(BASE_DIR, 'credentials.json')
 TOKEN_FILE = os.path.join(BASE_DIR, 'token.json')
 
 
-def _bootstrap_files():
-    """Write credentials/token from env vars if running on Railway (no local files)."""
-    creds_b64 = os.getenv('CREDENTIALS_JSON_B64')
-    if creds_b64 and not os.path.exists(CREDENTIALS_FILE):
-        with open(CREDENTIALS_FILE, 'w') as f:
-            f.write(base64.b64decode(creds_b64).decode())
-
-    token_b64 = os.getenv('TOKEN_JSON_B64')
-    if token_b64 and not os.path.exists(TOKEN_FILE):
-        with open(TOKEN_FILE, 'w') as f:
-            f.write(base64.b64decode(token_b64).decode())
-
-
 def get_credentials():
-    _bootstrap_files()
     creds = None
-    if os.path.exists(TOKEN_FILE):
+
+    # Production: load token directly from env var (no files needed)
+    token_b64 = os.getenv('TOKEN_JSON_B64')
+    if token_b64:
+        token_data = json.loads(base64.b64decode(token_b64).decode())
+        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+    elif os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            with open(TOKEN_FILE, 'w') as f:
-                f.write(creds.to_json())
+            if not token_b64 and os.path.exists(TOKEN_FILE):
+                with open(TOKEN_FILE, 'w') as f:
+                    f.write(creds.to_json())
         else:
-            if os.getenv('TOKEN_JSON_B64'):
-                raise RuntimeError(
-                    'Google credentials are invalid. Re-run OAuth locally, then update TOKEN_JSON_B64 in Railway.'
-                )
+            # Local dev only — run browser OAuth flow
+            if not os.path.exists(CREDENTIALS_FILE):
+                raise RuntimeError('credentials.json not found. See SETUP.md.')
             flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
             with open(TOKEN_FILE, 'w') as f:
