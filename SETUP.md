@@ -44,8 +44,7 @@ cp .env.example .env
 Edit `.env`:
 ```
 SENDER_EMAIL=your.gmail@gmail.com        # the Gmail account you just set up
-WEBSITE_URL=https://ninaibuilds.com
-CREDIBILITY_LINE=<your 1-2 sentence credibility statement>
+WEBSITE_URL=https://ninaiagencyandconsulting.netlify.app/
 TIMEZONE=America/New_York                # adjust to your timezone
 ```
 

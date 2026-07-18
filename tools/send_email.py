@@ -6,8 +6,7 @@ from email.mime.text import MIMEText
 from tools.google_auth import get_gmail_service
 
 SENDER_EMAIL = os.getenv('SENDER_EMAIL', '')
-WEBSITE_URL = os.getenv('WEBSITE_URL', '[YOUR WEBSITE URL]')
-CREDIBILITY_LINE = os.getenv('CREDIBILITY_LINE', '[CREDIBILITY LINE]')
+WEBSITE_URL = os.getenv('WEBSITE_URL', 'https://ninaiagencyandconsulting.netlify.app/')
 
 SENDER_NAME = 'Ishan Pattnaik'
 SENDER_TITLE = 'Chief Growth Strategist'
@@ -54,8 +53,6 @@ def send_followup_email(
 Great connecting — looking forward to our call on {meeting_str}.
 
 {overview}
-
-{CREDIBILITY_LINE}
 
 Your dedicated Google Meet link:
 {meet_link}

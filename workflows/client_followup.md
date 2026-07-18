@@ -43,8 +43,7 @@ After a discovery call, generate a unique Google Meet link for the scheduled mee
 ## Configuration (`.env`)
 ```
 SENDER_EMAIL=your.gmail@gmail.com
-WEBSITE_URL=https://ninaibuilds.com
-CREDIBILITY_LINE=<paste your 1-2 sentence credibility statement>
+WEBSITE_URL=https://ninaiagencyandconsulting.netlify.app/
 TIMEZONE=America/New_York
 ```
 
