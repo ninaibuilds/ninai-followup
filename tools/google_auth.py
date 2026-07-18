@@ -23,8 +23,11 @@ def get_credentials():
     # Production: load token directly from env var (no files needed)
     token_b64 = os.getenv('TOKEN_JSON_B64')
     if token_b64:
-        token_data = json.loads(base64.b64decode(token_b64).decode())
-        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+        try:
+            token_data = json.loads(base64.b64decode(token_b64).decode())
+            creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+        except Exception as e:
+            raise RuntimeError(f'TOKEN_JSON_B64 is set but could not be decoded: {e}') from e
     elif os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
 

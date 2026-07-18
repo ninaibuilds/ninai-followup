@@ -15,16 +15,16 @@ After a discovery call, generate a unique Google Meet link for the scheduled mee
 | Tool | Purpose |
 |------|---------|
 | `tools/google_auth.py` | OAuth 2.0 — shared credential manager for Calendar + Gmail |
-| `tools/create_meet_event.py` | Creates a Google Calendar event with a unique Meet link |
+| `tools/create_meet_event.py` | Creates a Google Calendar event with a unique Meet link, and stores the calculated reminder time on the event itself |
 | `tools/send_email.py` | Sends follow-up and reminder emails via Gmail API |
-| `tools/scheduler.py` | Persists and fires reminder jobs via APScheduler + SQLite |
+| `tools/reminders.py` | Scans upcoming Calendar events and fires any reminder that's due |
 
 ## Execution Sequence
-1. User submits form at `http://localhost:5000`
-2. `create_meet_event` → new Calendar event created, unique Meet URL returned
-3. `send_followup_email` → follow-up email sent immediately via Gmail
-4. `schedule_reminder` → one reminder job written to `.tmp/jobs.sqlite`
-5. APScheduler fires the reminder at the calculated time (see logic below)
+1. User submits form at the deployed URL (or `http://localhost:8080` for local dev)
+2. `create_meet_event` → new Calendar event created, unique Meet URL returned, reminder time stored as a private extended property on the event
+3. `send_followup_email` → follow-up email sent immediately via Gmail, in the same request
+4. A GitHub Actions cron job (`.github/workflows/cron.yml`) pings the app's `/cron` endpoint every 10 minutes
+5. `check_and_send_reminders` (in `tools/reminders.py`) finds any event whose reminder time has passed and hasn't been sent yet, sends the reminder email, and flags the event so it won't send twice
 
 ## Reminder Scheduling Logic
 | Time until meeting (at time of booking) | Reminder sent |
@@ -36,11 +36,12 @@ After a discovery call, generate a unique Google Meet link for the scheduled mee
 
 ## Edge Cases
 - **Meet link missing**: Google occasionally delays generating the link. If `meet_link` is None, the submit will fail with a clear error. Retry after a few seconds.
-- **Reminder fires while app is offline**: APScheduler uses `misfire_grace_time=3600` — if the app restarts within 1 hour of a missed reminder, it fires immediately on startup.
-- **Duplicate submissions**: Scheduler uses `replace_existing=True` keyed on `client_email + meeting_dt`, so resubmitting the same client/time overwrites the old job without duplicating.
-- **OAuth expiry**: `token.json` refresh tokens are long-lived. If auth fails, delete `token.json` and restart — the browser auth flow runs again.
+- **Reminder fires late**: the cron job only runs every 10 minutes, so a reminder can fire up to ~10 minutes after its calculated time.
+- **Duplicate reminders**: each Calendar event stores a `reminder_sent` flag, so a reminder is never sent twice even if the cron job overlaps or retries.
+- **OAuth expiry (local dev)**: `token.json` refresh tokens are long-lived. If auth fails, delete `token.json` and restart — the browser auth flow runs again.
+- **OAuth expiry (deployed)**: the deployed app reads credentials from the `TOKEN_JSON_B64` env var (base64-encoded `token.json`) instead of a file — see `tools/google_auth.py`. If this env var is missing or corrupted, Calendar/Gmail calls fail.
 
-## Configuration (`.env`)
+## Configuration (`.env` for local dev; same keys as env vars on the host for deployed use)
 ```
 SENDER_EMAIL=your.gmail@gmail.com
 WEBSITE_URL=https://ninaiagencyandconsulting.netlify.app/

@@ -269,6 +269,10 @@
     <div class="result error" id="result-error">
       <div class="result-title">Something went wrong</div>
       <div class="error-msg" id="error-msg"></div>
+      <details id="error-detail-wrap" style="display:none; margin-top: 10px;">
+        <summary style="cursor:pointer; font-size:12px; color:#9090a8;">Technical details</summary>
+        <pre id="error-detail" style="white-space:pre-wrap; word-break:break-all; font-size:11px; color:#fca5a5; margin-top:8px; max-height:200px; overflow:auto;"></pre>
+      </details>
     </div>
 
     <button class="send-another" id="send-another" type="button">Send another</button>
@@ -283,12 +287,15 @@
     const copyBtn = document.getElementById('copy-btn');
     const reminderNote = document.getElementById('reminder-note');
     const errorMsg = document.getElementById('error-msg');
+    const errorDetailWrap = document.getElementById('error-detail-wrap');
+    const errorDetail = document.getElementById('error-detail');
     const sendAnother = document.getElementById('send-another');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       resultSuccess.style.display = 'none';
       resultError.style.display = 'none';
+      errorDetailWrap.style.display = 'none';
       sendAnother.style.display = 'none';
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner"></span>Sending…';
@@ -309,6 +316,12 @@
           form.reset();
         } else {
           errorMsg.textContent = json.error || 'Unknown error.';
+          if (json.detail) {
+            errorDetail.textContent = json.detail;
+            errorDetailWrap.style.display = 'block';
+          } else {
+            errorDetailWrap.style.display = 'none';
+          }
           resultError.style.display = 'block';
         }
       } catch (err) {
